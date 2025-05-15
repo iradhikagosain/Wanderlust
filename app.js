@@ -21,6 +21,11 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
+app.use((req, res, next) => {
+    res.locals.curUser = req.user || null;
+    next();
+});
+
 // ROUTES
 const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
@@ -50,7 +55,7 @@ app.use(express.static(path.join(__dirname, "/public")));
 const store = MongoStore.create({
   mongoUrl: dbUrl,
   crypto: {
-    secret: process.env.secret,
+    secret: process.env.SECRET,
   },
   touchAfter: 24 * 3600,
 });
@@ -61,9 +66,9 @@ store.on("error", () => {
 // SESSION CONFIG
 const sessionOptions = {
   store,
-  secret:process.env.secret,
+  secret:process.env.SECRET,
   resave: false,
-  saveUninitialized: true, // ✅ corrected spelling
+  saveUninitialized: true, 
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -112,6 +117,9 @@ app.use((err, req, res, next) => {
 });
 
 // START SERVER
-app.listen(8081, () => {
-  console.log("Listening on port 8081");
+const PORT = process.env.PORT || 8081;
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });
+
+
